@@ -1,0 +1,7 @@
+apiVersion: compute.gcp.upbound.io/v1beta1
+kind: Network
+metadata:
+  name: example-routernat-network
+spec:
+  forProvider:
+    autoCreateSubnetworks: false

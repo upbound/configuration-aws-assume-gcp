@@ -1,0 +1,117 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xeks.aws.platform.upbound.io
+spec:
+  defaultCompositionRef:
+    name: xeks.aws.platform.upbound.io
+  connectionSecretKeys:
+    - kubeconfig
+  group: aws.platform.upbound.io
+  names:
+    kind: XEKS
+    plural: xeks
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  description: EKS configuration parameters.
+                  properties:
+                    id:
+                      type: string
+                      description: ID of this Cluster that other objects will use to refer to it.
+                    region:
+                      type: string
+                      description: Region is the region you'd like your resource to be created in.
+                    iam:
+                      type: object
+                      description: IAM configuration to connect as ClusterAdmin.
+                      properties:
+                        roleArn:
+                          description: The IAM Role ARN to connect as ClusterAdmin.
+                          type: string
+                          default: roleArn
+                        userArn:
+                          description: The IAM User ARN to connect as ClusterAdmin.
+                          type: string
+                          default: userArn
+                        autoscalerArn:
+                          description: The AutoScaler Role ARN to connect as ClusterAdmin.
+                          type: string
+                          default: autoscalerArn
+                    gcp:
+                      type: object
+                      description: Configuration settings for GCP impersonation using Workload Identity Federation with provider-gcp.
+                      properties:
+                        projectName:
+                          type: string
+                          description: The name of your GCP project. This is the human-readable name used to identify your project.
+                        projectId:
+                          type: string
+                          description: The unique number identifier for your GCP project.
+                        workloadIdentityPoolName:
+                          type: string
+                          description: The name of the Workload Identity Pool in GCP. This is used to federate identities between your AWS and GCP.
+                        serviceAccountName:
+                          type: string
+                          description: The name of the GCP service account that will be impersonated.
+                    deletionPolicy:
+                      description: Delete the external resources when the Claim/XR is deleted. Defaults to Delete
+                      enum:
+                        - Delete
+                        - Orphan
+                      type: string
+                      default: Delete
+                    providerConfigName:
+                      description: Crossplane ProviderConfig to use for provisioning this resources
+                      type: string
+                      default: default
+                    version:
+                      description: Kubernetes version
+                      type: string
+                      enum:
+                        - "1.28"
+                        - "1.27"
+                        - "1.26"
+                        - "1.25"
+                      default: "1.27"
+                    nodes:
+                      type: object
+                      description: EKS node configuration parameters.
+                      properties:
+                        count:
+                          type: integer
+                          description: Desired node count, from 1 to 100.
+                        instanceType:
+                          type: string
+                          description: instance types associated with the Node Group.
+                          default: t3.small
+                      required:
+                        - count
+                        - instanceType
+                  required:
+                    - id
+                    - region
+                    - deletionPolicy
+                    - providerConfigName
+                    - nodes
+                    - gcp
+              required:
+                - parameters
+            status:
+              description: A Status represents the observed state
+              properties:
+                eks:
+                  description: Freeform field containing status information for eks
+                  type: object
+                  x-kubernetes-preserve-unknown-fields: true
+              type: object
